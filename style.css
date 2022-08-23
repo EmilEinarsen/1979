@@ -1,0 +1,57 @@
+/* the props */
+@import "https://unpkg.com/open-props";
+
+/* optional imports that use the props */
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import "https://unpkg.com/open-props/buttons.min.css";
+
+.container {
+	display: grid;
+	place-content: center;
+	width: 100vw;
+	height: 100vh;
+}
+
+.wrapper {
+	display: flex;
+	flex-direction: column-reverse;
+	place-items: center;
+}
+
+canvas {
+	position: relative;
+	z-index: 3;
+	width: 800px;
+	height: 800px;
+	pointer-events: none;
+}
+
+.score-container {
+	display: grid;
+	place-items: center;
+	gap: var(--size-2);
+}
+
+.score-container .health {
+	display: flex;
+	gap: var(--size-4)
+}
+
+.score-container .health span {
+	--circle-size: var(--size-6);
+	width: var(--circle-size);
+	height: var(--circle-size);
+	border-radius: var(--radius-round);
+}
+.score-container .health span[data-alive=true] {
+	border: calc(var(--circle-size) / 8) red solid;
+	background-color: red;
+}
+.score-container .health span[data-alive=false] {
+	border: calc(var(--circle-size) / 8) red solid;
+	background-color: transparent;
+}
+
+.score-container .score {
+	font-size: var(--font-size-fluid-2);
+}

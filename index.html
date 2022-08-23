@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" >
+	<head>
+		<meta charset="UTF-8">
+		<title>1979</title>
+		<link rel="stylesheet" href="./style.css">
+		<script type="module">
+			import { GameEngine } from "./GameEngine/GameEngine.js";
+
+			const replayButton = document.querySelector('#replay')
+			const healthContainer = document.querySelector('#health')
+			const scoreLabel = document.querySelector('#score')
+			
+			replayButton?.addEventListener('click', GameEngine.reset)
+
+			healthContainer.innerHTML = Array.from({ length: GameEngine.health().current }, () => '<span data-alive="true"></span>').join('')
+			GameEngine.health.subscribe(v => {
+				if(!healthContainer) return
+				const indicators = healthContainer.children
+				for(let i = 0; i < indicators.length; i++)
+					indicators[i].dataset.alive = i < v.current
+			})
+
+			const setScore = v => {
+				if(!scoreLabel) return
+				scoreLabel.innerHTML = v.current.toString().padStart(2, '0')
+			}
+			setScore(GameEngine.score())
+			GameEngine.score.subscribe(setScore)
+		</script>
+	</head>
+	<body>
+		
+		<div class="container noselect">
+			<div class="wrapper">
+				<button id="replay">
+					RESTART
+				</button>
+				<canvas></canvas>
+				<div class="score-container">
+					<div id="health" class="health"></div>
+					<div id="score" class="score"></div>
+				</div>
+			</div>
+		</div>
+
+	</body>
+</html>
