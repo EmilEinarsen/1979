@@ -8,7 +8,6 @@ import { healthEvent } from "../events/healthEvent.js"
 export const Player = new class {
 	pos = new Vec(BOARD_SIZE / 2)
 	size = 30
-	shots = []
 	cursor = new Vec(
 		BOARD_SIZE / 2,
 		0
@@ -46,7 +45,7 @@ export const Player = new class {
 
 	reset() {
 		this.rotation = 0
-		this.shots.length = 0
+		ShotsPool.reset()
 	}
 
 	draw() {
@@ -57,13 +56,18 @@ export const Player = new class {
 		const rotation = this.rotation + Math.PI/2
 		this.engine.ctx.rotate(rotation)
 
-		const height = this.size * Math.cos(Math.PI / 6);
-		this.engine.ctx.moveTo(-this.size / 2, height / 2);
-		this.engine.ctx.lineTo(this.size / 2, height / 2);
-		this.engine.ctx.lineTo(0, -height / 2);
+		if(this.engine.configuration.assets.player?.sprite instanceof HTMLCanvasElement) {
+			const { sprite, width, height } = this.engine.configuration.assets.player
+			this.engine.ctx.drawImage(sprite, -((width / 2 + .5) | 0), -((height / 2 + .5) | 0))
+		} else {
+			const height = this.size * Math.cos(Math.PI / 6);
+			this.engine.ctx.moveTo(-this.size / 2, height / 2);
+			this.engine.ctx.lineTo(this.size / 2, height / 2);
+			this.engine.ctx.lineTo(0, -height / 2);
 
-		this.engine.ctx.fillStyle = 'red'
-		this.engine.ctx.fill()
+			this.engine.ctx.fillStyle = 'red'
+			this.engine.ctx.fill()
+		} 
 
 		this.engine.ctx.restore()
 

@@ -21,5 +21,3 @@ export const scoreEvent = createEvent('score', getDefault(), {
 scoreEvent.subscribe(score => {
 	score.isHighScore && window.localStorage.setItem('maxScore', score.max)
 })
-
-scoreEvent.subscribe(v => console.log(v.current))

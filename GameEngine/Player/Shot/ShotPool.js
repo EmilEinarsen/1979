@@ -2,6 +2,8 @@ import { SHOTS_POOL_SIZE } from "../../utils/constants.js"
 import { Shot } from "./Shot.js"
 
 export const ShotsPool = new class {
+	shots = []
+	
 	init(engine) {
 		this.engine = engine
 		this.shots = Array.from({ length: SHOTS_POOL_SIZE }).map(() => new Shot())

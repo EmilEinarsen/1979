@@ -5,6 +5,10 @@
 @import "https://unpkg.com/open-props/normalize.min.css";
 @import "https://unpkg.com/open-props/buttons.min.css";
 
+:root {
+	--player-fill: #FA6D9C;
+}
+
 .container {
 	display: grid;
 	place-content: center;
@@ -37,21 +41,35 @@ canvas {
 	gap: var(--size-4)
 }
 
-.score-container .health span {
+.score-container .health svg {
 	--circle-size: var(--size-6);
 	width: var(--circle-size);
 	height: var(--circle-size);
-	border-radius: var(--radius-round);
 }
-.score-container .health span[data-alive=true] {
-	border: calc(var(--circle-size) / 8) red solid;
-	background-color: red;
+.score-container .health svg[data-alive=true] {
+	color: var(--player-fill);
 }
-.score-container .health span[data-alive=false] {
-	border: calc(var(--circle-size) / 8) red solid;
-	background-color: transparent;
+.score-container .health svg[data-alive=false] {
+	color: transparent;
 }
 
 .score-container .score {
 	font-size: var(--font-size-fluid-2);
+}
+
+.sprite {
+	height: 100%;
+}
+
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: optimize-contrast;
+
+	pointer-events: all;
+}
+
+canvas:focus {
+	outline: none;
 }

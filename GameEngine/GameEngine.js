@@ -6,6 +6,7 @@ import { Player } from "./Player/Player.js"
 import { Board } from "./Board.js"
 import { MeteorPool } from "./Meteor/MeteorPool.js"
 import { Vec } from "./utils/Vec.js"
+import { convertElementToSprite } from "./utils/convertElementToSprite.js"
 
 export const GameEngine = new class {
 	canvas = document.querySelector('canvas')
@@ -15,14 +16,27 @@ export const GameEngine = new class {
 	offset = (CANVAS_SIZE - BOARD_SIZE) / 2
 	ctx = (() => {
 		const ctx = this.canvas.getContext('2d')
-		this.canvas.width = this.canvas.style.width = CANVAS_SIZE
-		this.canvas.height = this.canvas.style.height = CANVAS_SIZE
+		this.canvas.width = this.canvas.style.width = CANVAS_SIZE * window.devicePixelRatio
+		this.canvas.height = this.canvas.style.height = CANVAS_SIZE * window.devicePixelRatio
 		ctx.imageSmoothingEnabled = false
+
 		return ctx
 	})()
 
 	isGameOver
 	requestID
+
+	configuration = {
+		assets: {
+			player: undefined
+		}
+	}
+	setConfiguration(conf) {
+		if(typeof conf !== 'object' || Array.isArray(conf)) throw Error('invalid configuration')
+		if(conf.assets) {
+			if('player' in conf.assets) this.configuration.assets.player = convertElementToSprite(conf.assets.player)
+		}
+	}
 	
 	constructor() {
 		Board.init(this)
@@ -31,11 +45,15 @@ export const GameEngine = new class {
 		healthEvent.subscribe((v => {
 			this.isGameOver = v.isDead
 		}))
+		this.canvas.addEventListener('pointerdown', e => {
+			e.preventDefault();
+		})
 		this.reset()
 	}
 
 	resetContext() {
 		this.ctx.setTransform(1, 0, 0, 1, 0, 0)
+		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 		this.ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
 	}
 
@@ -116,12 +134,6 @@ export const GameEngine = new class {
 			})
 
 		this.gameLoop()
-	}
-
-	get settings() {
-		return {
-			numberOfHealth: 3
-		}
 	}
 
 	controller = controllerEvent
