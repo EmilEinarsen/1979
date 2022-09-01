@@ -22,9 +22,18 @@ const convertSVGElementToImage = (svgElement) => {
 	return { width, height, sprite }
 }
 
-export const convertElementToSprite = (element) => {
-	console.dir(element)
-	if(element.tagName === 'svg') return convertSVGElementToImage(element)
+const getImageFromUrl = src => {
+	if(typeof src !== 'string') throw Error('invalid src; Expected to be a string')
+
+	const image = new Image()
+	image.src = src
+
+	return image
+}
+
+export const convertToSprite = (asset) => {
+	if(asset?.tagName === 'svg') return convertSVGElementToImage(asset)
+	else if(typeof asset === 'string') return getImageFromUrl(asset)
 	else throw Error('Unimplemented DOM element to Sprite conversion')
 }
 

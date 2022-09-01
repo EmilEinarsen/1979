@@ -24,7 +24,7 @@ export class Meteor {
 		this.reset()
 	}
 
-	init({ pos, vel, type }) {
+	init({ pos, vel, type, sprite }) {
 		this.reset()
 		this.pos.set(pos.x, pos.y)
 		this.vel.set(vel.x, vel.y)
@@ -35,17 +35,23 @@ export class Meteor {
 		this.type = type
 		this.health = attribute.health
 		this.radius = attribute.radius
+		this.sprite = sprite
 	}
 
 	draw(ctx) {
 		if(!this.type) return
 		ctx.save()
 
-		ctx.fillStyle = 'blue'
-		ctx.beginPath()
-		ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2)
-		ctx.closePath()
-		ctx.fill()
+		if(this.sprite) {
+			ctx.drawImage(this.sprite.image, this.pos.x - this.radius, this.pos.y - this.radius, this.radius * 2, this.radius * 2)
+		} else {
+			ctx.fillStyle = 'blue'
+			ctx.beginPath()
+			ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2)
+			ctx.closePath()
+			ctx.fill()
+		}
+
 		
 		ctx.restore()
 	}

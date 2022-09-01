@@ -6,7 +6,7 @@ import { Player } from "./Player/Player.js"
 import { Board } from "./Board.js"
 import { MeteorPool } from "./Meteor/MeteorPool.js"
 import { Vec } from "./utils/Vec.js"
-import { convertElementToSprite } from "./utils/convertElementToSprite.js"
+import { convertToSprite } from "./utils/convertToSprite.js"
 
 export const GameEngine = new class {
 	canvas = document.querySelector('canvas')
@@ -28,14 +28,17 @@ export const GameEngine = new class {
 
 	configuration = {
 		assets: {
-			player: undefined
+			player: undefined,
+			astroids: undefined
 		}
 	}
 	setConfiguration(conf) {
 		if(typeof conf !== 'object' || Array.isArray(conf)) throw Error('invalid configuration')
 		if(conf.assets) {
-			if('player' in conf.assets) this.configuration.assets.player = convertElementToSprite(conf.assets.player)
+			if('player' in conf.assets) this.configuration.assets.player = convertToSprite(conf.assets.player)
+			if('astroids' in conf.assets) this.configuration.assets.astroids =  conf.assets.astroids.map(src => convertToSprite(src))
 		}
+		this.reset()
 	}
 	
 	constructor() {
@@ -66,19 +69,17 @@ export const GameEngine = new class {
 		this.ctx.closePath()
 	}
 
-	game(skipDraw = false) {
+	game() {
 		// update
 		Player.update()
 		MeteorPool.update()
 
-		if(skipDraw) return
 		this.drawBackground()
 		Player.draw()
 		MeteorPool.draw()
 	}
 	
-	gameOver(skipDraw = false) {
-		if(skipDraw) return
+	gameOver() {
 
 		this.ctx.fillStyle = GAME_OVER_TEXT_COLOR
 		this.ctx.textAlign = 'center'
@@ -92,26 +93,15 @@ export const GameEngine = new class {
 		this.ctx.fillText(`SCORE	 ${score.current}`, this.width / 2, this.height / 2 + 60)
 		this.ctx.fillText(`MAXSCORE	 ${score.highest}`, this.width / 2, this.height / 2 + 80)
 	}
-
-	get BLINK_ODDS() {
-		return this.isGameOver ? BOARD_BLINK_ODDS_GAME_OVER : BOARD_BLINK_ODDS
-	}
-	get BLINK_DURATION() {
-		return this.isGameOver ? BOARD_BLINK_DURATION_GAME_OVER : BOARD_BLINK_DURATION
-	}
+	
 	gameLoop() {
-		let prev
-		const tick = now => {
+		const tick = () => {
 			this.requestID = requestAnimationFrame(tick)
 			this.resetContext()
 			this.ctx.translate(this.offset, this.offset)
-
-			if(!prev && (Math.random() < this.BLINK_ODDS)) {
-				prev = performance.now()
-			} else if(this.BLINK_DURATION < (now - prev)) prev = undefined
 			
-			if (!this.isGameOver) this.game(!!prev) 
-			else this.gameOver(!!prev)
+			if (!this.isGameOver) this.game() 
+			else this.gameOver()
 		}
 		tick()
 	}

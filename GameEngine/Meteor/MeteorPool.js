@@ -11,7 +11,11 @@ export const MeteorPool = new class {
 	create({ pos, vel, type }) {
 		let available = this.meteors.find(s => !s.active)
 		if(!available) available = this.meteors[this.meteors.push(new Meteor())-1]
-		available.init({ pos, vel, type })
+
+		let indices = Array.from({ length: 10 }, () => 0)
+		for(const meteor of this.meteors) meteor.sprite && indices[meteor.sprite.index]++
+		const indexOfMin = indices.reduce((p, c, i) => p[0] < c ? p : [c, i], [Infinity, Infinity])[1]
+		available.init({ pos, vel, type, sprite: this.engine.configuration?.assets?.astroids && { index: indexOfMin, image: this.engine.configuration.assets.astroids[indexOfMin] } })
 	}
 
 	update() {
