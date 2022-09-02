@@ -1,5 +1,7 @@
 import { Board } from "../Board.js"
 import { scoreEvent } from "../events/scoreEvent.js"
+import { ASTROID_SPRITE_SCALE } from "../utils/constants.js"
+import { createColorizedSprite } from "../utils/utils.js"
 import { Vec } from "../utils/Vec.js"
 
 const ATTRIBUTES = {
@@ -12,6 +14,8 @@ export class Meteor {
 	id = self.crypto.randomUUID()
 	pos = new Vec(Infinity)
 	vel = new Vec(0)
+	rot = 0
+	rotVel = 0
 	radius = 0
 	health = 0
 	type = undefined
@@ -24,10 +28,11 @@ export class Meteor {
 		this.reset()
 	}
 
-	init({ pos, vel, type, sprite }) {
+	init({ pos, vel, rotVel, type, sprite }) {
 		this.reset()
 		this.pos.set(pos.x, pos.y)
 		this.vel.set(vel.x, vel.y)
+		this.rotVel = rotVel
 
 		const attribute = ATTRIBUTES[type]
 		if(!attribute) throw Error(`Invalid Meteor type ${type}; has no corresponding attributes`)
@@ -36,20 +41,29 @@ export class Meteor {
 		this.health = attribute.health
 		this.radius = attribute.radius
 		this.sprite = sprite
+		if(!sprite) return
+		this.sprite.image = createColorizedSprite(this.sprite.image, this.sprite.color)
 	}
 
 	draw(ctx) {
 		if(!this.type) return
 		ctx.save()
 
+		ctx.translate(this.pos.x, this.pos.y)
+		ctx.rotate(this.rot)
+
 		if(this.sprite) {
-			ctx.drawImage(this.sprite.image, this.pos.x - this.radius, this.pos.y - this.radius, this.radius * 2, this.radius * 2)
+			ctx.drawImage(this.sprite.image, -this.radius, -this.radius, this.radius * 2 * ASTROID_SPRITE_SCALE, this.radius * 2 * ASTROID_SPRITE_SCALE)
 		} else {
 			ctx.fillStyle = 'blue'
+			ctx.strokeStyle = 'red'
 			ctx.beginPath()
-			ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2)
+			ctx.arc(0, 0, this.radius, 0, Math.PI * 2)
+			ctx.moveTo(0, 0)
+			ctx.lineTo(0, this.radius)
 			ctx.closePath()
 			ctx.fill()
+			ctx.stroke()
 		}
 
 		
@@ -61,6 +75,7 @@ export class Meteor {
 		
 		this.wallCollisions()
 		this.pos.add(this.vel)
+		this.rot += this.rotVel
 	}
 	
 	wallCollisions() {
@@ -83,6 +98,8 @@ export class Meteor {
 	reset() {
 		this.pos.set(Infinity)
 		this.vel.set(0)
+		this.rot = 0
+		this.rotVel = 0
 		this.health = 0
 		this.type = undefined
 	}

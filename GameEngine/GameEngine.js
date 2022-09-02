@@ -1,7 +1,7 @@
 import { controllerEvent } from "./events/controllerEvent.js"
 import { healthEvent } from "./events/healthEvent.js"
 import { scoreEvent } from "./events/scoreEvent.js"
-import { BOARD_BACKGROUND_COLOR, BOARD_BLINK_DURATION, BOARD_BLINK_DURATION_GAME_OVER, BOARD_BLINK_ODDS, BOARD_BLINK_ODDS_GAME_OVER, BOARD_SIZE, CANVAS_SIZE, GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
+import { BOARD_BACKGROUND_COLOR, BOARD_SIZE, CANVAS_SIZE, GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
 import { Player } from "./Player/Player.js"
 import { Board } from "./Board.js"
 import { MeteorPool } from "./Meteor/MeteorPool.js"
@@ -9,6 +9,7 @@ import { Vec } from "./utils/Vec.js"
 import { convertToSprite } from "./utils/convertToSprite.js"
 
 export const GameEngine = new class {
+	state = 'loading'
 	canvas = document.querySelector('canvas')
 
 	width = BOARD_SIZE
@@ -29,14 +30,17 @@ export const GameEngine = new class {
 	configuration = {
 		assets: {
 			player: undefined,
-			astroids: undefined
+			astroids: undefined,
+			laser: undefined
 		}
 	}
-	setConfiguration(conf) {
+	async setConfiguration(conf) {
+		this.state = 'loading'
 		if(typeof conf !== 'object' || Array.isArray(conf)) throw Error('invalid configuration')
 		if(conf.assets) {
-			if('player' in conf.assets) this.configuration.assets.player = convertToSprite(conf.assets.player)
-			if('astroids' in conf.assets) this.configuration.assets.astroids =  conf.assets.astroids.map(src => convertToSprite(src))
+			if('player' in conf.assets) this.configuration.assets.player = await convertToSprite(conf.assets.player)
+			if('astroids' in conf.assets) this.configuration.assets.astroids =  await Promise.all(conf.assets.astroids.map(src => convertToSprite(src)))
+			if('laser' in conf.assets) this.configuration.assets.laser = await convertToSprite(conf.assets.laser)
 		}
 		this.reset()
 	}
@@ -75,12 +79,12 @@ export const GameEngine = new class {
 		MeteorPool.update()
 
 		this.drawBackground()
+		if(this.state === 'loading') return
 		Player.draw()
 		MeteorPool.draw()
 	}
 	
 	gameOver() {
-
 		this.ctx.fillStyle = GAME_OVER_TEXT_COLOR
 		this.ctx.textAlign = 'center'
 		this.ctx.textBaseline = 'bottom'
@@ -109,6 +113,7 @@ export const GameEngine = new class {
 	reset = () => {
 		cancelAnimationFrame(this.requestID)
 
+		this.state = 'static'
 		this.isGameOver = false
 		scoreEvent.dispatch({ reset: true })
 		healthEvent.dispatch({ reset: true })
@@ -120,6 +125,7 @@ export const GameEngine = new class {
 			MeteorPool.create({
 				pos: new Vec(this.width * Math.random(), this.height * Math.random()),
 				vel: new Vec(Math.random()*2 - 1, Math.random()*2 - 1),
+				rotVel: (Math.PI * 2 * Math.random() - Math.PI) / 1000,
 				type: 'large'
 			})
 

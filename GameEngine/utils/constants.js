@@ -64,6 +64,43 @@ export const SHOT_VELOCITY = 5
 export const SHOT_LENGTH = 50
 
 
+/* ASTROID */
+/**
+ * Scale applied to asset to better fill hit area.
+ * Might be a useful configuration if assets are perceptually smaller then the hit area.
+ */
+export const ASTROID_SPRITE_SCALE = 1.2
+
+/**
+ * Astroid colors
+ */
+export const ASTROID_COLORS = {
+	'candy-apple-red': '#f05237',
+	'vital-orange': '#ff9350',
+	'sunnyside': '#ffce2d',
+	'lucky-green': '#79c47a',
+	'sea-glass': '#3aa8b8',
+	'moonstone': '#91a0e2',
+	'iris-infusion': '#c39acb',
+	'power-pink': '#fa6d9c',
+	'guava': '#ff8d90',
+	'papaya-fizz': '#ffaa8f',
+	'citron': '#eddb4c',
+	'limeade': '#b7d664',
+	'aqua-splash': '#66d7de',
+	'blue-paradise': '#56c4e8',
+	'orchid-frost': '#dacedb',
+	'tropical-pink': '#faa5dd',
+	'pebble-gray': '#bdb5af',
+	'canary-yellow': '#faf19d',
+	'acid-lime': '#dfe561',
+	'fresh-mint': '#b9e7dd',
+	'washed-denim': '#99c6ee',
+	'positively-pink': '#ffb9c8',
+	'pink-salt': '#f2ddde',
+	'first-snow': '#f1f3f4',
+}
+Object.entries(ASTROID_COLORS).forEach(([k, c]) => document.documentElement.style.setProperty(`--${k}`, c))
 
 
 document.addEventListener('DOMContentLoaded', () => {

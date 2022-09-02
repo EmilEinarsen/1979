@@ -50,7 +50,7 @@ export const Player = new class {
 
 	draw() {
 		ShotsPool.draw()
-		
+
 		this.engine.ctx.save()
 
 		this.engine.ctx.translate(this.pos.x, this.pos.y)

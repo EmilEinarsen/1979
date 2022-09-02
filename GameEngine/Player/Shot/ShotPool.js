@@ -15,6 +15,7 @@ export const ShotsPool = new class {
 		available.init({
 			pos: pos,
 			vel: vel,
+			sprite: this.engine.configuration.assets.laser
 		})
 	}
 
