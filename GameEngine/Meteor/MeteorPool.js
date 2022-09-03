@@ -19,9 +19,12 @@ export const MeteorPool = new class {
 		})()
 
 		const color = (() => {
-			Object.values(ASTROID_COLORS)
-			const colors = Object.values(ASTROID_COLORS)
-			return colors[Math.round((colors.length-1) * Math.random())]
+			const colors = [...Object.values(ASTROID_COLORS), ...this.meteors.map(m => m.sprite?.color).filter(Boolean)]
+			const colorCount = {};
+			for(const color of colors) colorCount[color] === undefined ? colorCount[color] = 0 : colorCount[color]++
+			const minCount = Math.min(...Object.values(colorCount))
+			const availableColors = Object.entries(colorCount).filter(v => v[1] === minCount)
+			return availableColors[Math.round((availableColors.length-1) * Math.random())][0]
 		} )()
 
 		return { 
