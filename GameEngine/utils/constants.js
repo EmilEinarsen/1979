@@ -9,43 +9,23 @@ export const GAME_OVER_TITLE_FONT = getFontString({ fontWeight: 'bold', fontSize
 export const GAME_OVER_SUBTITLE_FONT = getFontString()
 
 /**
- * Controls the application framerate. 
- * Should be coordinated with `SNAKE_MOVE_DELAY`
- */
-export const FPS = 120
-
-/**
  * Size of the Canvas
  */
 export const CANVAS_SIZE = 800
+
+/* BOARD */
 /**
  * Size of the Game view
  */
 export const BOARD_SIZE = 800
 /**
- * Number of particles used/recycled withing the ParticlePool
- */
-export const PARTICLE_POOL_SIZE = 30
-/**
- * Odds of the game-play not to render, causing blinking 
- */
-export const BOARD_BLINK_ODDS = .0025
-/**
- * Duration of the game-play blinking in ms
- */
- export const BOARD_BLINK_DURATION = 10
-/**
- * Odds of the game-play not to render, causing blinking 
- */
-export const BOARD_BLINK_ODDS_GAME_OVER = .0025
-/**
- * Duration of the game-play blinking in ms
- */
-export const BOARD_BLINK_DURATION_GAME_OVER = 100
-/**
  * Background color
  */
 export let BOARD_BACKGROUND_COLOR = ''
+/**
+ * Color of the dotted circle
+ */
+export let BOARD_DOT_COLOR = ''
 
 /* PLAYER */
 /**
@@ -126,14 +106,19 @@ Object.entries(ASTROID_COLORS).forEach(([k, c]) => document.documentElement.styl
 
 
 document.addEventListener('DOMContentLoaded', () => {
+	let isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
 	const getVar = n => getComputedStyle(document.documentElement).getPropertyValue(n)
 
 	const observeCSSVariables = () => {
-		BOARD_BACKGROUND_COLOR = getVar('--surface-2')
+		BOARD_BACKGROUND_COLOR = getVar('--surface-1')
+		BOARD_DOT_COLOR = isDarkMode ? getVar('--gray-7') : getVar('--gray-5')
 	}
 	observeCSSVariables()
 
 	setInterval(observeCSSVariables, 1000)
-	window.matchMedia("(prefers-color-scheme: dark)").addListener(observeCSSVariables);
+	window.matchMedia("(prefers-color-scheme: dark)").addListener(e => {
+		isDarkMode = e.matches
+		observeCSSVariables()
+	});
 	
 })

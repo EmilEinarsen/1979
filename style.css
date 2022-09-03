@@ -9,6 +9,10 @@
 	--player-fill: #FA6D9C;
 }
 
+body {
+	background-color: var(--surface-2);
+}
+
 .container {
 	display: grid;
 	place-content: center;

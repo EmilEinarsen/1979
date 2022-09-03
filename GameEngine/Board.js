@@ -1,4 +1,4 @@
-import { BOARD_BACKGROUND_COLOR } from "./utils/constants.js"
+import { BOARD_BACKGROUND_COLOR, BOARD_DOT_COLOR } from "./utils/constants.js"
 
 export const Board = new class {
 	init(engine) {
@@ -12,21 +12,43 @@ export const Board = new class {
 	}
 
 	draw() {
+		this.engine.ctx.save()
+
+		// clear background
 		this.engine.ctx.fillStyle = BOARD_BACKGROUND_COLOR
 		this.engine.ctx.fillRect(0, 0, this.engine.width, this.engine.height)
 
-		/* const base = 16
+		// draw dotted radiuses
+		this.engine.ctx.translate(this.engine.width/2, this.engine.height/2)
+		const dotSize = 2
+		const distanceBetweenDots = 4;
+		
+		const edge = Math.max(this.engine.width, this.engine.height) / 2 + 100
+		const base = 16
 		let exp = 3
 		let multi = 4
 
-		let radius = (multi * base) / 2
-		for(let i = 0; radius < this.engine.width; i++) {
-			
+		let radius = 0
+		while(radius < edge) {
+			radius = (multi * base) / 2
+			const n = Math.ceil((radius / distanceBetweenDots) * 100) / 100;
+			const alpha = (Math.PI * 2) / n;
 
-			for() {
-				var x = radius * Math.cos(angle);
-				var y = radius * Math.sin(angle);
+			for(let i = 0; i < n; i++) {
+				const theta = alpha * i;
+				const point = {
+					x: Math.cos(theta) * radius,
+					y: Math.sin(theta) * radius
+				};
+
+				this.engine.ctx.fillStyle = BOARD_DOT_COLOR
+				this.engine.ctx.fillRect(point.x, point.y, dotSize, dotSize);
 			}
-		} */
+
+			exp++;
+			multi += exp;
+		}
+
+		this.engine.ctx.restore()
 	}
 }()
