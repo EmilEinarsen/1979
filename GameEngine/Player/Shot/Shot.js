@@ -11,10 +11,6 @@ export class Shot {
 	tail = new Vec(Infinity)
 	active = false
 
-	constructor() {
-		this.reset()
-	}
-
 	init({ pos, vel, sprite }) {
 		if(this.active) return
 		this.reset()
@@ -22,7 +18,7 @@ export class Shot {
 		this.origin.set(pos.x, pos.y)
 		this.head = this.origin.clone()
 		this.tail = this.origin.clone()
-		this.sprite = createColorizedSprite(sprite, ASTROID_COLORS["power-pink"])
+		if(sprite) this.sprite = createColorizedSprite(sprite, ASTROID_COLORS["power-pink"])
 		this.active = true
 	}
 

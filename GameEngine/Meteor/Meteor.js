@@ -24,10 +24,6 @@ export class Meteor {
 		return !!this.type
 	}
 
-	constructor() {
-		this.reset()
-	}
-
 	init({ pos, vel, rotVel, type, sprite }) {
 		this.reset()
 		this.pos.set(pos.x, pos.y)

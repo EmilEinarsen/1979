@@ -52,6 +52,22 @@ export let BOARD_BACKGROUND_COLOR = ''
  * Movement speed
  */
 export const PLAYER_MOVEMENT_SPEED = 1
+/**
+ * Duration the player is considered "hurt" in ms
+ */
+export const PLAYER_HURT_DURATION = 3e3
+/**
+ * Number of times the player should blink during the duration specified by `PLAYER_HURT_DURATION`
+ */
+export const PLAYER_HURT_BLINK_COUNT = 8
+/**
+ * Duration of a blink
+ */
+export const PLAYER_HURT_BLINK_DURATION = PLAYER_HURT_DURATION / (PLAYER_HURT_BLINK_COUNT * 2)
+/**
+ * Opacity applied while player is hurt
+ */
+export const PLAYER_HURT_OPACITY = .6
 
 /* SHOTS */
 /**

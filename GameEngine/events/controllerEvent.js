@@ -50,8 +50,6 @@ const pointerDispatch = e => controllerEvent.dispatch({ source: e.type })
 document.addEventListener('pointerdown', pointerDispatch, false)
 document.addEventListener('pointerup', pointerDispatch, false)
 
-const keyDispatch = e => (console.log(e),controllerEvent.dispatch({ source: e.type, key: e.key }))
+const keyDispatch = e => controllerEvent.dispatch({ source: e.type, key: e.key })
 document.addEventListener('keydown', keyDispatch, false)
 document.addEventListener('keyup', keyDispatch, false)
-
-controllerEvent.subscribe(console.log)
