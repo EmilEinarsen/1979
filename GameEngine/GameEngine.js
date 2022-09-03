@@ -64,21 +64,12 @@ export const GameEngine = new class {
 		this.ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
 	}
 
-	drawBackground() {
-		this.ctx.beginPath()
-
-		this.ctx.fillStyle = BOARD_BACKGROUND_COLOR
-		this.ctx.fillRect(0, 0, this.width, this.height)
-		
-		this.ctx.closePath()
-	}
-
 	game() {
 		// update
 		Player.update()
 		MeteorPool.update()
 
-		this.drawBackground()
+		Board.draw()
 		if(this.state === 'loading') return
 		Player.draw()
 		MeteorPool.draw()

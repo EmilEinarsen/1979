@@ -1,9 +1,10 @@
 import { Vec } from "../utils/Vec.js"
 import { controllerEvent } from "../events/controllerEvent.js"
-import { BOARD_SIZE } from "../utils/constants.js"
+import { BOARD_SIZE, PLAYER_MOVEMENT_SPEED } from "../utils/constants.js"
 import { ShotsPool } from "./Shot/ShotPool.js"
 import { MeteorPool } from "../Meteor/MeteorPool.js"
 import { healthEvent } from "../events/healthEvent.js"
+import { Board } from "../Board.js"
 
 export const Player = new class {
 	pos = new Vec(BOARD_SIZE / 2)
@@ -12,6 +13,7 @@ export const Player = new class {
 		BOARD_SIZE / 2,
 		0
 	)
+	direction = new Vec(0, 0)
 
 	_rect
 	getBoundingClientRect() {
@@ -20,8 +22,12 @@ export const Player = new class {
 
 	constructor() {
 		this.reset()
-		controllerEvent.subscribe(({ isClick }) => {
+		controllerEvent.subscribe(({ isClick, move }) => {
 			isClick && this.shoot()
+			this.direction = {
+				x: move.right ? PLAYER_MOVEMENT_SPEED : move.left ? -PLAYER_MOVEMENT_SPEED : 0,
+				y: move.up ? -PLAYER_MOVEMENT_SPEED : move.down ? PLAYER_MOVEMENT_SPEED : 0,
+			}
 		})
 		document.addEventListener('pointermove', e => {
 			this.cursor = new Vec(e.clientX, e.clientY).sub(this.getBoundingClientRect())
@@ -45,6 +51,7 @@ export const Player = new class {
 
 	reset() {
 		this.rotation = 0
+		this.pos .set(BOARD_SIZE / 2, BOARD_SIZE / 2)
 		ShotsPool.reset()
 	}
 
@@ -82,7 +89,16 @@ export const Player = new class {
 		})
 	}
 
+	wallCollisions() {
+		if(this.pos.y - this.size / 2 < Board.walls.top.y) this.pos.set(this.pos.x, Board.walls.top.y + this.size / 2)
+		if(this.pos.x + this.size / 2 > Board.walls.right.x) this.pos.set(Board.walls.right.x - this.size / 2, this.pos.y)
+		if(this.pos.y + this.size / 2  > Board.walls.bottom.y) this.pos.set(this.pos.x, Board.walls.bottom.y - this.size / 2)
+		if(this.pos.x - this.size / 2 < Board.walls.left.x) this.pos.set(Board.walls.left.x + this.size / 2, this.pos.y)
+	}
+
 	update() {
+		this.pos.add(this.direction)
+		this.wallCollisions()
 		this.rotation = Math.atan2(
 			this.cursor.y - this.pos.y, 
 			this.cursor.x - this.pos.x

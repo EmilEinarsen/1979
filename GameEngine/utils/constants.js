@@ -47,6 +47,12 @@ export const BOARD_BLINK_DURATION_GAME_OVER = 100
  */
 export let BOARD_BACKGROUND_COLOR = ''
 
+/* PLAYER */
+/**
+ * Movement speed
+ */
+export const PLAYER_MOVEMENT_SPEED = 1
+
 /* SHOTS */
 /**
  * Shots pool size
