@@ -15,10 +15,6 @@ export const CANVAS_SIZE = 800
 
 /* BOARD */
 /**
- * Size of the Game view
- */
-export const BOARD_SIZE = 800
-/**
  * Background color
  */
 export let BOARD_BACKGROUND_COLOR = ''

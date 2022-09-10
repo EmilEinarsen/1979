@@ -1,6 +1,6 @@
 import { Vec } from "../utils/Vec.js"
 import { controllerEvent } from "../events/controllerEvent.js"
-import { BOARD_SIZE, PLAYER_HURT_BLINK_COUNT, PLAYER_HURT_BLINK_DURATION, PLAYER_HURT_DURATION, PLAYER_HURT_OPACITY, PLAYER_MOVEMENT_SPEED } from "../utils/constants.js"
+import { CANVAS_SIZE, PLAYER_HURT_BLINK_DURATION, PLAYER_HURT_DURATION, PLAYER_HURT_OPACITY, PLAYER_MOVEMENT_SPEED } from "../utils/constants.js"
 import { ShotsPool } from "./Shot/ShotPool.js"
 import { MeteorPool } from "../Meteor/MeteorPool.js"
 import { healthEvent } from "../events/healthEvent.js"
@@ -22,12 +22,7 @@ export const Player = new class {
 		this._stateTimestamp = window.performance.now()
 	}
 
-	pos = new Vec(BOARD_SIZE / 2)
 	size = 30
-	cursor = new Vec(
-		BOARD_SIZE / 2,
-		0
-	)
 	direction = new Vec(0, 0)
 
 	_rect
@@ -130,7 +125,12 @@ export const Player = new class {
 	reset() {
 		this.state = PLAYER_STATE.normal
 		this.rotation = 0
-		this.pos.set(BOARD_SIZE / 2, BOARD_SIZE / 2)
+		
+		this.pos = new Vec(this.engine.width / 2, this.engine.height / 2)
+		this.cursor = new Vec(
+			this.engine.width / 2,
+			0
+		)
 		ShotsPool.reset()
 		if(this.engine.configuration.assets.player) {
 			const { sprite, ...size } = this.engine.configuration.assets.player

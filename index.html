@@ -15,6 +15,9 @@
 			const player = !isDebug ? document.querySelector('#player') : undefined
 			
 			!isDebug && GameEngine.setConfiguration({
+				settings: {
+					fullscreen: true
+				},
 				assets: {
 					player: (player.style = 'color: #FA6D9C;', player),
 					astroids: Array.from({ length: 10 }, (_, i) => `assets/astroids/astroid-${i+1}.png`),
@@ -59,7 +62,7 @@
 		
 		<div class="container noselect">
 			<div class="wrapper">
-				<button id="replay">
+				<button class="replay" id="replay">
 					RESTART
 				</button>
 				<canvas></canvas>

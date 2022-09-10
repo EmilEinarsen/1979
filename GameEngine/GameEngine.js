@@ -1,7 +1,7 @@
 import { controllerEvent } from "./events/controllerEvent.js"
 import { healthEvent } from "./events/healthEvent.js"
 import { scoreEvent } from "./events/scoreEvent.js"
-import { BOARD_BACKGROUND_COLOR, BOARD_SIZE, CANVAS_SIZE, GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
+import { CANVAS_SIZE, GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
 import { Player } from "./Player/Player.js"
 import { Board } from "./Board.js"
 import { MeteorPool } from "./Meteor/MeteorPool.js"
@@ -12,22 +12,29 @@ export const GameEngine = new class {
 	state = 'loading'
 	canvas = document.querySelector('canvas')
 
-	width = BOARD_SIZE
-	height = BOARD_SIZE
-	offset = (CANVAS_SIZE - BOARD_SIZE) / 2
-	ctx = (() => {
-		const ctx = this.canvas.getContext('2d')
-		this.canvas.width = this.canvas.style.width = CANVAS_SIZE * window.devicePixelRatio
-		this.canvas.height = this.canvas.style.height = CANVAS_SIZE * window.devicePixelRatio
-		ctx.imageSmoothingEnabled = false
-
-		return ctx
-	})()
+	width = CANVAS_SIZE
+	height = CANVAS_SIZE
+	
+	#_ctx
+	get ctx() {
+		return this.#_ctx ||= (() => {
+			const ctx = this.canvas.getContext('2d')
+			this.canvas.width = this.width * window.devicePixelRatio
+			this.canvas.height = this.height * window.devicePixelRatio
+			this.canvas.style =  `width: ${this.width}px; height: ${this.height}px;`
+			ctx.imageSmoothingEnabled = false
+			return ctx
+		})()
+	}
 
 	isGameOver
 	requestID
 
 	configuration = {
+		settings: {
+			isFullscreen: false,
+			size: undefined
+		},
 		assets: {
 			player: undefined,
 			astroids: undefined,
@@ -41,6 +48,20 @@ export const GameEngine = new class {
 			if('player' in conf.assets) this.configuration.assets.player = await convertToSprite(conf.assets.player)
 			if('astroids' in conf.assets) this.configuration.assets.astroids =  await Promise.all(conf.assets.astroids.map(src => convertToSprite(src)))
 			if('laser' in conf.assets) this.configuration.assets.laser = await convertToSprite(conf.assets.laser)
+		}
+		if(conf.settings) {
+			if('size' in conf.settings && typeof conf.settings.size === 'object' && typeof conf.settings.size.width === 'number' && typeof conf.settings.size.health === 'number') {
+				this.configuration.settings.size = conf.settings.size
+				this.width = conf.settings.size.width
+				this.height = conf.settings.size.height
+				this.#_ctx = undefined
+			}
+			if('fullscreen' in conf.settings) {
+				this.configuration.settings.isFullscreen = true
+				this.width = window.innerWidth
+				this.height = window.innerHeight
+				this.#_ctx = undefined
+			}
 		}
 		this.reset()
 	}
@@ -109,8 +130,9 @@ export const GameEngine = new class {
 		scoreEvent.dispatch({ reset: true })
 		healthEvent.dispatch({ reset: true })
 
-		Player.reset()
-		MeteorPool.reset()
+		Board.init(this)
+		Player.init(this)
+		MeteorPool.init(this)
 		
 		for(let i = 0; i < 4; i++)
 			MeteorPool.create({

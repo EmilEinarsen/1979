@@ -7,10 +7,13 @@
 
 :root {
 	--player-fill: #FA6D9C;
+	--z-index-canvas: 3;
+	--z-index-ui: 5;
 }
 
 body {
 	background-color: var(--surface-2);
+	overflow: hidden;
 }
 
 .container {
@@ -28,13 +31,14 @@ body {
 
 canvas {
 	position: relative;
-	z-index: 3;
-	width: 800px;
-	height: 800px;
+	z-index: var(--z-index-canvas);
 	pointer-events: none;
 }
 
 .score-container {
+	position: fixed;
+	top: 2rem;
+	z-index: 5;
 	display: grid;
 	place-items: center;
 	gap: var(--size-2);
@@ -86,4 +90,10 @@ canvas {
 
 canvas:focus {
 	outline: none;
+}
+
+button.replay {
+	position: fixed;
+	bottom: 2rem;
+	z-index: var(--z-index-ui);
 }
