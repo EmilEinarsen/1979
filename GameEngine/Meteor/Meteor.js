@@ -61,7 +61,6 @@ export class Meteor {
 			ctx.fill()
 			ctx.stroke()
 		}
-
 		
 		ctx.restore()
 	}

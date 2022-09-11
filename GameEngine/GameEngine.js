@@ -1,7 +1,7 @@
 import { controllerEvent } from "./events/controllerEvent.js"
 import { healthEvent } from "./events/healthEvent.js"
 import { scoreEvent } from "./events/scoreEvent.js"
-import { CANVAS_SIZE, GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
+import { GAME_OVER_SUBTITLE_FONT, GAME_OVER_TEXT_COLOR, GAME_OVER_TITLE_FONT } from "./utils/constants.js"
 import { Player } from "./Player/Player.js"
 import { Board } from "./Board.js"
 import { MeteorPool } from "./Meteor/MeteorPool.js"
@@ -10,30 +10,39 @@ import { convertToSprite } from "./utils/convertToSprite.js"
 
 export const GameEngine = new class {
 	state = 'loading'
-	canvas = document.querySelector('canvas')
-
-	width = CANVAS_SIZE
-	height = CANVAS_SIZE
 	
 	#_ctx
 	get ctx() {
 		return this.#_ctx ||= (() => {
 			const ctx = this.canvas.getContext('2d')
-			this.canvas.width = this.width * window.devicePixelRatio
-			this.canvas.height = this.height * window.devicePixelRatio
-			this.canvas.style =  `width: ${this.width}px; height: ${this.height}px;`
 			ctx.imageSmoothingEnabled = false
 			return ctx
 		})()
+	}
+
+	setSize(size) {
+		this.canvas.width = size.width * window.devicePixelRatio
+		this.canvas.height = size.height * window.devicePixelRatio
+		this.width = size.width
+		this.height = size.height
+		this.canvas.style =  `width: ${size.width}px; height: ${size.height}px;`
+	}
+
+	convertCursor(x, y) { 
+		const rect = this.canvas.getBoundingClientRect()
+		return { x: x - rect.x, y: y - rect.y } 
 	}
 
 	isGameOver
 	requestID
 
 	configuration = {
+		canvas: undefined,
+		isPorted: false,
 		settings: {
 			isFullscreen: false,
-			size: undefined
+			size: undefined,
+			rotation: 0
 		},
 		assets: {
 			player: undefined,
@@ -42,47 +51,60 @@ export const GameEngine = new class {
 		}
 	}
 	async setConfiguration(conf) {
-		this.state = 'loading'
-		if(typeof conf !== 'object' || Array.isArray(conf)) throw Error('invalid configuration')
-		if(conf.assets) {
-			if('player' in conf.assets) this.configuration.assets.player = await convertToSprite(conf.assets.player)
-			if('astroids' in conf.assets) this.configuration.assets.astroids =  await Promise.all(conf.assets.astroids.map(src => convertToSprite(src)))
-			if('laser' in conf.assets) this.configuration.assets.laser = await convertToSprite(conf.assets.laser)
-		}
-		if(conf.settings) {
-			if('size' in conf.settings && typeof conf.settings.size === 'object' && typeof conf.settings.size.width === 'number' && typeof conf.settings.size.health === 'number') {
-				this.configuration.settings.size = conf.settings.size
-				this.width = conf.settings.size.width
-				this.height = conf.settings.size.height
-				this.#_ctx = undefined
+		try {
+			if(typeof conf !== 'object' || Array.isArray(conf)) throw 'Mst be an plain object'
+
+			if('port' in conf) {
+				if(!(conf.port instanceof CanvasRenderingContext2D)) throw 'Property port expected instanceof CanvasRenderingContext2D'
+				
+				this.configuration.canvas = conf.port.canvas
+				this.#_ctx = conf.port
+				this.configuration.isPorted = true
+			} else if('canvas' in conf) {
+				if(!(conf.canvas instanceof HTMLCanvasElement)) throw 'Property canvas expected instanceof HTMLCanvasElement'
+				
+				this.configuration.canvas = conf.canvas
+			} else throw 'Incomplete configuration. Method \`init()\` requires a object containing property \`canvas\` or \`port\`.'
+
+			this.canvas = this.configuration.canvas
+
+			if(conf.settings) {
+				if('size' in conf.settings && typeof conf.settings.size === 'object' && typeof conf.settings.size.width === 'number' && typeof conf.settings.size.height === 'number') {
+					this.setSize(this.configuration.settings.size = conf.settings.size)
+				}
+
+				if('rotation' in conf.settings && typeof conf.settings.rotation === 'number') {
+					this.rotation = this.configuration.settings.rotation = conf.settings.rotation
+				}
+
+				if(!conf.port && 'fullscreen' in conf.settings && conf.settings.fullscreen) {
+					this.configuration.settings.isFullscreen = true
+					this.setSize({
+						width: window.innerWidth,
+						height: window.innerHeight
+					})
+				}
 			}
-			if('fullscreen' in conf.settings) {
-				this.configuration.settings.isFullscreen = true
-				this.width = window.innerWidth
-				this.height = window.innerHeight
-				this.#_ctx = undefined
+
+			this.state = 'loading'
+			if(conf.assets) {
+				if('player' in conf.assets) this.configuration.assets.player = await convertToSprite(conf.assets.player)
+				if('astroids' in conf.assets) this.configuration.assets.astroids =  await Promise.all(conf.assets.astroids.map(src => convertToSprite(src)))
+				if('laser' in conf.assets) this.configuration.assets.laser = await convertToSprite(conf.assets.laser)
 			}
+
+			return this.reset()
+		} catch (error) {
+			throw error
 		}
-		this.reset()
 	}
 	
-	constructor() {
-		Board.init(this)
-		Player.init(this)
-		MeteorPool.init(this)
-		healthEvent.subscribe((v => {
-			this.isGameOver = v.isDead
-		}))
-		this.canvas.addEventListener('pointerdown', e => {
-			e.preventDefault();
+	async init(...params) {
+		await this.setConfiguration(...params).then(() => {
+			healthEvent.subscribe((v => {
+				this.isGameOver = v.isDead
+			}))
 		})
-		this.reset()
-	}
-
-	resetContext() {
-		this.ctx.setTransform(1, 0, 0, 1, 0, 0)
-		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-		this.ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
 	}
 
 	game() {
@@ -111,18 +133,39 @@ export const GameEngine = new class {
 	}
 	
 	gameLoop() {
+		for(let i = 0; i < 4; i++)
+			MeteorPool.create({
+				pos: new Vec(this.width * Math.random(), this.height * Math.random()),
+				vel: new Vec(Math.random()*2 - 1, Math.random()*2 - 1),
+				rotVel: (Math.PI * 2 * Math.random() - Math.PI) / 1000,
+				type: 'large'
+			})
+
 		const tick = () => {
-			this.requestID = requestAnimationFrame(tick)
-			this.resetContext()
-			this.ctx.translate(this.offset, this.offset)
+			if(!this.configuration.isPorted) {
+				this.requestID = requestAnimationFrame(tick)
+
+				// Reset identity matrix in case someone forgot to reset
+				this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+				// this.ctx.imageSmoothingEnabled = false
+
+				this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+				this.ctx.clearRect(0, 0, this.width, this.height)
+			}
+
+			this.ctx.beginPath()
+			this.ctx.rect(0, 0, this.width, this.height)
+			this.ctx.clip()
+			this.ctx.closePath()
 			
 			if (!this.isGameOver) this.game() 
 			else this.gameOver()
 		}
-		tick()
+		return this.configuration.isPorted ? tick : tick()
 	}
 	
-	reset = () => {
+	reset() {
 		cancelAnimationFrame(this.requestID)
 
 		this.state = 'static'
@@ -133,16 +176,8 @@ export const GameEngine = new class {
 		Board.init(this)
 		Player.init(this)
 		MeteorPool.init(this)
-		
-		for(let i = 0; i < 4; i++)
-			MeteorPool.create({
-				pos: new Vec(this.width * Math.random(), this.height * Math.random()),
-				vel: new Vec(Math.random()*2 - 1, Math.random()*2 - 1),
-				rotVel: (Math.PI * 2 * Math.random() - Math.PI) / 1000,
-				type: 'large'
-			})
 
-		this.gameLoop()
+		return this.gameLoop()
 	}
 
 	controller = controllerEvent

@@ -1,6 +1,6 @@
 import { Vec } from "../utils/Vec.js"
 import { controllerEvent } from "../events/controllerEvent.js"
-import { CANVAS_SIZE, PLAYER_HURT_BLINK_DURATION, PLAYER_HURT_DURATION, PLAYER_HURT_OPACITY, PLAYER_MOVEMENT_SPEED } from "../utils/constants.js"
+import { PLAYER_HURT_BLINK_DURATION, PLAYER_HURT_DURATION, PLAYER_HURT_OPACITY, PLAYER_MOVEMENT_SPEED } from "../utils/constants.js"
 import { ShotsPool } from "./Shot/ShotPool.js"
 import { MeteorPool } from "../Meteor/MeteorPool.js"
 import { healthEvent } from "../events/healthEvent.js"
@@ -25,11 +25,6 @@ export const Player = new class {
 	size = 30
 	direction = new Vec(0, 0)
 
-	_rect
-	getBoundingClientRect() {
-		return this._rect ||= this.engine.canvas.getBoundingClientRect()
-	}
-
 	constructor() {
 		controllerEvent.subscribe(({ isClick, move }) => {
 			isClick && this.shoot()
@@ -38,8 +33,8 @@ export const Player = new class {
 				y: move.up ? -PLAYER_MOVEMENT_SPEED : move.down ? PLAYER_MOVEMENT_SPEED : 0,
 			}
 		})
-		document.addEventListener('pointermove', e => {
-			this.cursor = new Vec(e.clientX, e.clientY).sub(this.getBoundingClientRect())
+		window.addEventListener('pointermove', e => {
+			this.cursor = this.engine.convertCursor(e.clientX, e.clientY)
 		})
 	}
 
@@ -79,15 +74,18 @@ export const Player = new class {
 			this.engine.ctx.drawImage(shouldBlink ? hurt : normal, -((width / 2 + .5) | 0), -((height / 2 + .5) | 0))
 		} else {
 			const height = this.size * Math.cos(Math.PI / 6);
+			this.engine.ctx.beginPath()
 			this.engine.ctx.moveTo(-this.size / 2, height / 2);
 			this.engine.ctx.lineTo(this.size / 2, height / 2);
 			this.engine.ctx.lineTo(0, -height / 2);
-
+			this.engine.ctx.closePath()
 			this.engine.ctx.fillStyle = shouldBlink ? 'white' : 'red'
 			this.engine.ctx.fill()
-		} 
+		}
 
 		this.engine.ctx.restore()
+
+		this.sprite || this.engine.ctx.fillRect(this.cursor.x-5, this.cursor.y-5, 10, 10)
 	}
 
 	update() {

@@ -86,6 +86,7 @@ canvas {
   image-rendering: optimize-contrast;
 
 	pointer-events: all;
+	background-color: var(--surface-1);
 }
 
 canvas:focus {

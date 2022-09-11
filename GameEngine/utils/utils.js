@@ -45,3 +45,57 @@ export const createCutoutSprite = (sprite, color) => {
 
 	return canvas
 }
+
+export const getNormalizedCanvasSize = canvas => ({
+  width: canvas.width / window.devicePixelRatio,
+  height: canvas.height / window.devicePixelRatio
+});
+
+export const convertViewportCoordsToSceneCoords = ({
+  x,
+  y,
+  vpt
+}) => {
+  const invScale = 1 / vpt.zoom.value;
+  return {
+    x: (x - vpt.zoom.translation.x) * invScale - vpt.scrollX,
+    y: (y - vpt.zoom.translation.y) * invScale - vpt.scrollY
+  };
+};
+
+export const getNewZoom = (
+  zoomValue,
+  previousZoom,
+  zoomOnViewportPoint = { x: 0, y: 0 }
+) => {
+
+  return {
+    value: zoomValue,
+    translation: {
+      x:
+        zoomOnViewportPoint.x -
+        (zoomOnViewportPoint.x - previousZoom.translation.x) *
+          (zoomValue / previousZoom.value),
+      y:
+        zoomOnViewportPoint.y -
+        (zoomOnViewportPoint.y - previousZoom.translation.y) *
+          (zoomValue / previousZoom.value)
+    }
+  };
+};
+
+/**
+ * Rotates `target` relative to `origin` by `angle`
+ * @param target Point to rotate
+ * @param origin Point to rotate `target` relative to
+ * @param angle Number in radians to rotate `target` by
+ * @returns Return the rotated target
+ */
+ export const rotate = (a, c, o) =>
+  // https://math.stackexchange.com/questions/2204520/how-do-i-rotate-a-line-segment-in-a-specific-point-on-the-line
+  ({
+    // 𝑎′𝑥=(𝑎𝑥−𝑐𝑥)cos𝜃−(𝑎𝑦−𝑐𝑦)sin𝜃+𝑐𝑥
+    x: (a.x - c.x) * Math.cos(o) - (a.y - c.y) * Math.sin(o) + c.x,
+    // 𝑎′𝑦=(𝑎𝑥−𝑐𝑥)sin𝜃+(𝑎𝑦−𝑐𝑦)cos𝜃+𝑐𝑦.
+    y: (a.x - c.x) * Math.sin(o) + (a.y - c.y) * Math.cos(o) + c.y
+  });

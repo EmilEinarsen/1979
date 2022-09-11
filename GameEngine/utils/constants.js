@@ -13,6 +13,16 @@ export const GAME_OVER_SUBTITLE_FONT = getFontString()
  */
 export const CANVAS_SIZE = 800
 
+export const DEFAULT_VPT = {
+  zoom: {
+    value: 1,
+    translation: { x: 0, y: 0 }
+  },
+  scrollX: 0,
+  scrollY: 0,
+	rotation: 0
+};
+
 /* BOARD */
 /**
  * Background color
@@ -106,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	const getVar = n => getComputedStyle(document.documentElement).getPropertyValue(n)
 
 	const observeCSSVariables = () => {
-		BOARD_BACKGROUND_COLOR = getVar('--surface-1')
-		BOARD_DOT_COLOR = isDarkMode ? getVar('--gray-7') : getVar('--gray-5')
+		BOARD_BACKGROUND_COLOR = getVar('--surface-1') || (isDarkMode ? 'MidnightBlue' : 'GhostWhite')
+		BOARD_DOT_COLOR = isDarkMode ? (getVar('--gray-7') || 'DarkSlateGray') :(getVar('--gray-5') || 'LightGray')
 	}
 	observeCSSVariables()
 
