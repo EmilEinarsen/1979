@@ -6,77 +6,79 @@
 @import "https://unpkg.com/open-props/buttons.min.css";
 
 :root {
-	--player-fill: #FA6D9C;
-	--z-index-canvas: 3;
-	--z-index-ui: 5;
+  --player-fill: #fa6d9c;
+  --z-index-canvas: 3;
+  --z-index-ui: 5;
 }
 
 body {
-	background-color: var(--surface-2);
-	overflow: hidden;
+  background-color: var(--surface-2);
+  overflow: hidden;
 }
 
 .container {
-	display: grid;
-	place-content: center;
-	width: 100vw;
-	height: 100vh;
+  display: grid;
+  place-content: center;
+  width: 100vw;
+  height: 100vh;
 }
 
 .wrapper {
-	display: flex;
-	flex-direction: column-reverse;
-	place-items: center;
+  display: flex;
+  flex-direction: column-reverse;
+  place-items: center;
 }
 
 canvas {
-	position: relative;
-	z-index: var(--z-index-canvas);
-	pointer-events: none;
+  position: relative;
+  z-index: var(--z-index-canvas);
+  pointer-events: none;
 }
 
 .score-container {
-	position: fixed;
-	top: 2rem;
-	z-index: 5;
-	display: grid;
-	place-items: center;
-	gap: var(--size-2);
+  position: fixed;
+  top: 2rem;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  gap: var(--size-2);
+  pointer-events: none;
+  user-select: none;
 }
 
 .score-container .health {
-	display: flex;
-	gap: var(--size-4)
+  display: flex;
+  gap: var(--size-4);
 }
 
 .score-container .health svg,
 .score-container .health span {
-	--circle-size: var(--size-6);
-	width: var(--circle-size);
-	height: var(--circle-size);
+  --circle-size: var(--size-6);
+  width: var(--circle-size);
+  height: var(--circle-size);
 }
 
 .score-container .health span {
-	border: 2px solid var(--player-fill);
-	border-radius: var(--radius-round);
+  border: 2px solid var(--player-fill);
+  border-radius: var(--radius-round);
 }
 
-.score-container .health svg[data-alive=true] {
-	color: var(--player-fill);
+.score-container .health svg[data-alive="true"] {
+  color: var(--player-fill);
 }
-.score-container .health svg[data-alive=false] {
-	color: transparent;
+.score-container .health svg[data-alive="false"] {
+  color: transparent;
 }
 
-.score-container .health span[data-alive=true] {
-	background-color: var(--player-fill);
+.score-container .health span[data-alive="true"] {
+  background-color: var(--player-fill);
 }
-.score-container .health span[data-alive=false] {
-	background-color: transparent;
+.score-container .health span[data-alive="false"] {
+  background-color: transparent;
 }
 
 .score-container .score {
-	font-size: var(--font-size-fluid-2);
+  font-size: var(--font-size-fluid-2);
 }
 
 canvas {
@@ -85,16 +87,16 @@ canvas {
   image-rendering: crisp-edges;
   image-rendering: optimize-contrast;
 
-	pointer-events: all;
-	background-color: var(--surface-1);
+  pointer-events: all;
+  background-color: var(--surface-1);
 }
 
 canvas:focus {
-	outline: none;
+  outline: none;
 }
 
 button.replay {
-	position: fixed;
-	bottom: 2rem;
-	z-index: var(--z-index-ui);
+  position: fixed;
+  bottom: 2rem;
+  z-index: var(--z-index-ui);
 }
